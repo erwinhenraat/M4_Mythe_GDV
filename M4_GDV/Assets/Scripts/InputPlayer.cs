@@ -8,10 +8,13 @@ using UnityEngine.InputSystem;
 
 //2. Geef een blokje een rigidbody en laat hem springen als je op jump drukt
 
+// Zorg dat het blok je niet draait als hij ergens tegenaan loopt (rigidbody constraints)
 
-//3. Beweeg het blokje meerdere richtingen op met de moveAction
+//3. Zorg dat je blokje pas weer kan springen als hij de grond heeft geraakt
 
-//4. Zorg dat ook "i","k", "j" en "l" als bindings werken voor de movement van player 1
+//4. Beweeg het blokje meerdere richtingen op met de moveAction
+
+//5. Zorg dat ook "i","k", "j" en "l" als bindings werken voor de movement van player 1
 
 
 //Huiswerk
@@ -84,7 +87,7 @@ public class InputPlayer : MonoBehaviour
         else if (jumpAction.WasReleasedThisFrame())
         {
             //Debug.Log("was released this frame");
-            jumpForce = jumpTimer * jumpForcePerSec;
+            jumpForce = jumpTimer * jumpForcePerSec + 200f;
             Jump(jumpForce);
 
 
