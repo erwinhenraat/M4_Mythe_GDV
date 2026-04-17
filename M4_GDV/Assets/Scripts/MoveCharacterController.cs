@@ -12,17 +12,20 @@ public class MoveCharacterController : MonoBehaviour
     [SerializeField] private float jumpHeight = 2f;
     [SerializeField] private float gravity = -20f;
     private InputActionMap map;
-    private InputAction moveAction;
-    private InputAction sprintAction;
-    private InputAction jumpAction;
-    private float verticalVelocity;
-    private CharacterController characterController;
-    public Vector2 movementInput; //value will be usable in other scripts, for example to call animations
 
+    private InputAction sprintAction;
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private CharacterController characterController;
+    private Animator animator;
+
+    private Vector2 movementInput;
+    private float verticalVelocity;
 
     void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
         map = inputAsset.FindActionMap(mapName);
         moveAction = map.FindAction("Move");
         sprintAction = map.FindAction("Sprint");
@@ -63,21 +66,30 @@ public class MoveCharacterController : MonoBehaviour
 
             if (jumpAction.WasPressedThisFrame())
             {
+                // Only allow jump if the landing animation has finished
+                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                bool landingDone = !stateInfo.IsName("Landing") || stateInfo.normalizedTime >= 1f;
 
-                // v = sqrt(2 * |gravity| * jumpHeight)
-                // the jump height is determined by the initial velocity and the gravity,
-                // so we calculate the initial velocity needed to reach the desired jump height with the given gravity
-                verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(gravity) * jumpHeight);
+                if (landingDone)
+                {
+                    // v = sqrt(2 * |gravity| * jumpHeight)
+                    verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(gravity) * jumpHeight);
+                    animator.SetTrigger("JumpTrigger");
+                }
             }
         }
         else
         {
-            //not grounded, apply gravity
+            //not grounded, apply gravity           
             verticalVelocity += gravity * Time.deltaTime;
         }
 
         move.y = verticalVelocity * Time.deltaTime;
 
         characterController.Move(move);
+
+        // Animation
+        animator.SetFloat("InputVertical", movementInput.y);
+        animator.SetBool("Grounded", characterController.isGrounded);
     }
 }
